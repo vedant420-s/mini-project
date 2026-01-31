@@ -287,6 +287,13 @@ def about():
     }
     return jsonify(about_info), 200
 
+@app.route('/documentation')
+def documentation():
+    """
+    Display project documentation page
+    """
+    return render_template('documentation.html')
+
 # ============================================
 # ERROR HANDLERS
 # ============================================
