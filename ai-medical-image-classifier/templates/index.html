@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Meta tags for responsiveness and character encoding -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Medical Image Classification - AI Diagnosis Assistant</title>
+    
+    <!-- Link to CSS stylesheet -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <!-- ============================================
+         HEADER SECTION
+         ============================================ -->
+    <header class="header">
+        <div class="container">
+            <h1 class="app-title">🏥 Medical Image Classification System</h1>
+            <p class="app-subtitle">AI-Powered X-ray Analysis using Deep Learning</p>
+        </div>
+    </header>
+
+    <!-- ============================================
+         MAIN CONTENT
+         ============================================ -->
+    <main class="container">
+        <!-- ============================================
+             MEDICAL DISCLAIMER (IMPORTANT!)
+             ============================================ -->
+        <section class="disclaimer">
+            <h2>⚠️ IMPORTANT MEDICAL DISCLAIMER</h2>
+            <p>
+                <strong>This application is for EDUCATIONAL PURPOSES ONLY.</strong>
+            </p>
+            <ul>
+                <li>❌ NOT approved by medical authorities</li>
+                <li>❌ Should NOT be used for actual diagnosis</li>
+                <li>❌ NOT a replacement for professional medical opinion</li>
+                <li>✓ Always consult a qualified radiologist or physician</li>
+                <li>✓ Use results as a REFERENCE ONLY</li>
+            </ul>
+            <p>
+                This AI system is a demonstration of machine learning capabilities 
+                and should not be used for making medical decisions.
+            </p>
+        </section>
+
+        <!-- ============================================
+             UPLOAD SECTION
+             ============================================ -->
+        <section class="upload-section">
+            <h2>Step 1: Upload X-ray Image</h2>
+            
+            <!-- Image upload form -->
+            <form id="uploadForm" enctype="multipart/form-data">
+                <div class="upload-container">
+                    <!-- Hidden file input -->
+                    <input 
+                        type="file" 
+                        id="imageInput" 
+                        name="file" 
+                        accept=".jpg,.jpeg,.png,.gif,.bmp"
+                        required
+                    >
+                    
+                    <!-- Upload button (click triggers file input) -->
+                    <label for="imageInput" class="upload-button">
+                        <span class="upload-icon">📁</span>
+                        <span class="upload-text">Click to upload or drag image here</span>
+                        <span class="file-types">JPG, PNG, GIF, or BMP (Max 16MB)</span>
+                    </label>
+                </div>
+            </form>
+
+            <!-- Drag and drop zone -->
+            <div id="dragDropZone" class="drag-drop-zone">
+                <p>📤 Drag and drop your X-ray image here</p>
+            </div>
+
+            <!-- Informational text -->
+            <p class="info-text">
+                💡 Supported formats: JPG, PNG, GIF, BMP
+                | Max file size: 16MB
+                | Recommended: 224x224 pixels
+            </p>
+        </section>
+
+        <!-- ============================================
+             IMAGE PREVIEW SECTION
+             ============================================ -->
+        <section id="previewSection" class="preview-section" style="display: none;">
+            <h2>Step 2: Preview Image</h2>
+            <div class="preview-container">
+                <img id="previewImage" src="" alt="Image preview" class="preview-image">
+                <p id="fileName" class="file-info"></p>
+            </div>
+        </section>
+
+        <!-- ============================================
+             PREDICTION SECTION
+             ============================================ -->
+        <section id="predictionSection" class="prediction-section" style="display: none;">
+            <h2>Step 3: Analysis Results</h2>
+            
+            <!-- Loading spinner -->
+            <div id="loadingSpinner" class="loading-container" style="display: none;">
+                <div class="spinner"></div>
+                <p>Analyzing X-ray image...</p>
+                <p class="loading-detail">This may take a few seconds</p>
+            </div>
+            
+            <!-- Prediction result -->
+            <div id="resultContainer" style="display: none;">
+                <!-- Normal result card -->
+                <div id="normalResult" class="result-card normal-card" style="display: none;">
+                    <div class="result-header">
+                        <h3>✓ NORMAL</h3>
+                        <span class="result-badge">Negative</span>
+                    </div>
+                    <div class="result-body">
+                        <p class="confidence">
+                            Confidence: <span id="normalConfidence">0</span>%
+                        </p>
+                        <div class="confidence-bar">
+                            <div id="normalBar" class="confidence-fill normal-bar"></div>
+                        </div>
+                        <p class="description">
+                            The X-ray analysis indicates no visible signs of pneumonia.
+                        </p>
+                        <p class="note">
+                            ℹ️ This is an automated analysis. Always confirm with a medical professional.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Pneumonia result card -->
+                <div id="pneumoniaResult" class="result-card pneumonia-card" style="display: none;">
+                    <div class="result-header">
+                        <h3>⚠️ PNEUMONIA DETECTED</h3>
+                        <span class="result-badge">Positive</span>
+                    </div>
+                    <div class="result-body">
+                        <p class="confidence">
+                            Confidence: <span id="pneumoniaConfidence">0</span>%
+                        </p>
+                        <div class="confidence-bar">
+                            <div id="pneumoniaBar" class="confidence-fill pneumonia-bar"></div>
+                        </div>
+                        <p class="description">
+                            The X-ray analysis suggests signs consistent with pneumonia.
+                        </p>
+                        <p class="alert">
+                            ⚠️ <strong>Seek medical consultation immediately!</strong>
+                        </p>
+                        <p class="note">
+                            ℹ️ This is an automated analysis. Professional medical evaluation is essential.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Error result -->
+                <div id="errorResult" class="result-card error-card" style="display: none;">
+                    <div class="result-header">
+                        <h3>❌ ERROR</h3>
+                    </div>
+                    <div class="result-body">
+                        <p id="errorMessage" class="error-text"></p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================
+             ACTION BUTTONS
+             ============================================ -->
+        <section class="button-section">
+            <button id="analyzeButton" type="button" class="btn btn-analyze" style="display: none;">
+                🔬 Analyze Image
+            </button>
+            <button id="resetButton" type="button" class="btn btn-reset" style="display: none;">
+                🔄 Upload Another Image
+            </button>
+        </section>
+
+        <!-- ============================================
+             INFORMATION SECTION
+             ============================================ -->
+        <section class="info-section">
+            <h2>About This System</h2>
+            <div class="info-grid">
+                <div class="info-card">
+                    <h3>🧠 Technology</h3>
+                    <p>
+                        <strong>Model:</strong> MobileNetV2 with Transfer Learning<br>
+                        <strong>Framework:</strong> TensorFlow/Keras<br>
+                        <strong>Purpose:</strong> Binary classification (Normal/Pneumonia)
+                    </p>
+                </div>
+                <div class="info-card">
+                    <h3>📊 Dataset</h3>
+                    <p>
+                        <strong>Source:</strong> Kaggle Chest X-ray Pneumonia Dataset<br>
+                        <strong>Classes:</strong> 2 (NORMAL, PNEUMONIA)<br>
+                        <strong>Training Images:</strong> ~5,200 X-rays
+                    </p>
+                </div>
+                <div class="info-card">
+                    <h3>⚙️ How It Works</h3>
+                    <p>
+                        <strong>1.</strong> Upload chest X-ray image<br>
+                        <strong>2.</strong> Image is resized to 224x224 pixels<br>
+                        <strong>3.</strong> Pixel values normalized (0-1)<br>
+                        <strong>4.</strong> CNN extracts features and predicts<br>
+                        <strong>5.</strong> Results displayed with confidence
+                    </p>
+                </div>
+                <div class="info-card">
+                    <h3>📚 Educational Purpose</h3>
+                    <p>
+                        <strong>For:</strong> BCA 2nd year students learning AI/ML<br>
+                        <strong>Topics:</strong> Deep Learning, Transfer Learning, Flask<br>
+                        <strong>Use:</strong> Reference only, NOT for diagnosis
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================
+             PERFORMANCE METRICS
+             ============================================ -->
+        <section class="metrics-section">
+            <h2>Model Performance (on test data)</h2>
+            <table class="metrics-table">
+                <thead>
+                    <tr>
+                        <th>Metric</th>
+                        <th>Value</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Accuracy</td>
+                        <td>~92-95%</td>
+                        <td>Correct predictions out of total</td>
+                    </tr>
+                    <tr>
+                        <td>Sensitivity/Recall</td>
+                        <td>~93-96%</td>
+                        <td>Correctly identifies pneumonia cases</td>
+                    </tr>
+                    <tr>
+                        <td>Specificity</td>
+                        <td>~91-94%</td>
+                        <td>Correctly identifies normal cases</td>
+                    </tr>
+                    <tr>
+                        <td>Precision</td>
+                        <td>~92-95%</td>
+                        <td>Accuracy when predicting pneumonia</td>
+                    </tr>
+                </tbody>
+            </table>
+            <p class="metrics-note">
+                📌 These are approximate values. Actual performance depends on training and dataset quality.
+            </p>
+        </section>
+    </main>
+
+    <!-- ============================================
+         FOOTER
+         ============================================ -->
+    <footer class="footer">
+        <div class="container">
+            <p>
+                🎓 Educational Project By Vedant Khedkar and Sakshi Pandey <br>
+                <strong>For Learning Purposes Only - NOT for Medical Diagnosis</strong>
+            </p>
+            <p>
+                Built with Flask, TensorFlow, and HTML/CSS/JavaScript
+            </p>
+        </div>
+    </footer>
+
+    <!-- Link to JavaScript file -->
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>
