@@ -1,11 +1,11 @@
 ================================================================================
-AI MEDICAL IMAGE CLASSIFIER - BCA ACADEMIC PROJECT
+AI MEDICAL IMAGE CLASSIFIER
 Comprehensive Technical Documentation for Faculty Review
 ================================================================================
 
 PROJECT TITLE: AI-Based Medical Image Classification Web App for X-ray/MRI Diagnosis
-AUTHOR: Vedant (BCA Student)
-DATE: January 31, 2026
+AUTHOR: vedant and sakshi 
+
 GITHUB: https://github.com/vedant420-s/mini-project
 
 ================================================================================
