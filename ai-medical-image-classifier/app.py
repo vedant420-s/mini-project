@@ -23,6 +23,7 @@ Instructions:
 
 from flask import Flask, render_template, request, jsonify
 import os
+os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'
 import numpy as np
 from tensorflow.keras.models import load_model
 from tensorflow.keras.preprocessing import image
