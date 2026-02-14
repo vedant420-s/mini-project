@@ -43,27 +43,44 @@ app = Flask(__name__)
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
 
 # ============================================
-# LOAD MODEL
+# LOAD MODELS
 # ============================================
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-MODEL_PATH = os.path.join(BASE_DIR, 'models', 'model.h5')
+PNEUMONIA_MODEL_PATH = os.path.join(BASE_DIR, 'models', 'model.h5')
+DETECTOR_MODEL_PATH = os.path.join(BASE_DIR, 'models', 'xray_detector.h5')
 
-print(f"Loading model from {MODEL_PATH}...")
+print(f"Loading pneumonia model from {PNEUMONIA_MODEL_PATH}...")
+print(f"Loading detector model from {DETECTOR_MODEL_PATH}...")
 
-# Check if model exists
-if not os.path.exists(MODEL_PATH):
-    print(f"❌ ERROR: Model not found at {MODEL_PATH}")
-    print("Please run train_model.py first to train the model")
+# Check if pneumonia model exists
+if not os.path.exists(PNEUMONIA_MODEL_PATH):
+    print(f"❌ ERROR: Pneumonia model not found at {PNEUMONIA_MODEL_PATH}")
+    print("Please run train_model.py first to train the pneumonia model")
     exit(1)
+
+# Check if detector model exists
+if not os.path.exists(DETECTOR_MODEL_PATH):
+    print(f"⚠️ WARNING: Detector model not found at {DETECTOR_MODEL_PATH}")
+    print("Running without detector model - assuming all images are chest X-rays")
+    detector_model = None
 
 try:
-    # Load the trained model
-    model = load_model(MODEL_PATH)
-    print("✓ Model loaded successfully!")
+    # Load the trained pneumonia model
+    pneumonia_model = load_model(PNEUMONIA_MODEL_PATH)
+    print("✓ Pneumonia model loaded successfully!")
 except Exception as e:
-    print(f"❌ Error loading model: {e}")
+    print(f"❌ Error loading pneumonia model: {e}")
     exit(1)
+
+if detector_model is not None:
+    try:
+        # Load the trained detector model
+        detector_model = load_model(DETECTOR_MODEL_PATH)
+        print("✓ Detector model loaded successfully!")
+    except Exception as e:
+        print(f"❌ Error loading detector model: {e}")
+        detector_model = None
 
 # ============================================
 # DEFINE CLASSES
@@ -125,34 +142,63 @@ def preprocess_image(img_file):
     except Exception as e:
         return None, False, f"Error preprocessing image: {str(e)}"
 
-def predict_image(img_array):
+def detect_chest_xray(img_array):
     """
-    Make prediction on preprocessed image
-    
+    Detect if the image is a chest X-ray using the detector model
+
     Args:
         img_array: Preprocessed numpy array
-    
+
+    Returns:
+        is_chest_xray (bool), confidence (float), success (bool), message (str)
+    """
+    # If detector model is not available, assume all images are chest X-rays
+    if detector_model is None:
+        return True, 1.0, True, "Detector model not available - assuming valid chest X-ray"
+
+    try:
+        # Get detector model prediction (output is probability for class 1 = Chest X-ray)
+        prediction = detector_model.predict(img_array, verbose=0)
+
+        # Extract confidence (probability of being a chest X-ray)
+        confidence = prediction[0][0]
+
+        # Determine if it's a chest X-ray (>90% confidence threshold)
+        is_chest_xray = confidence > 0.9
+
+        return is_chest_xray, confidence, True, "Detection successful"
+
+    except Exception as e:
+        return False, 0.0, False, f"Error in detection: {str(e)}"
+
+def predict_pneumonia(img_array):
+    """
+    Make pneumonia prediction on preprocessed chest X-ray image
+
+    Args:
+        img_array: Preprocessed numpy array
+
     Returns:
         Prediction class and confidence
     """
     try:
-        # Get model prediction (output is probability for class 1)
-        prediction = model.predict(img_array, verbose=0)
-        
+        # Get pneumonia model prediction (output is probability for class 1 = PNEUMONIA)
+        prediction = pneumonia_model.predict(img_array, verbose=0)
+
         # Extract confidence (probability)
         confidence = prediction[0][0]
-        
+
         # Determine class (0 if confidence < 0.5, else 1)
         class_idx = 1 if confidence > 0.5 else 0
-        
+
         # Adjust confidence to represent the predicted class
         if class_idx == 0:
             confidence = 1 - confidence
-        
-        return class_idx, confidence, True, "Prediction successful"
-    
+
+        return class_idx, confidence, True, "Pneumonia prediction successful"
+
     except Exception as e:
-        return None, None, False, f"Error making prediction: {str(e)}"
+        return None, None, False, f"Error making pneumonia prediction: {str(e)}"
 
 # ============================================
 # ROUTES
@@ -228,42 +274,70 @@ def predict():
         print(f"✓ {preprocess_msg}")
         
         # ============================================
-        # STEP 2: MAKE PREDICTION
+        # STEP 2: DETECT CHEST X-RAY (GATEKEEPER)
         # ============================================
-        
-        class_idx, confidence, pred_success, pred_msg = predict_image(img_array)
-        
+
+        is_chest_xray, detector_confidence, detect_success, detect_msg = detect_chest_xray(img_array)
+
+        if not detect_success:
+            print(f"❌ Detection failed: {detect_msg}")
+            return jsonify({
+                'success': False,
+                'error': detect_msg
+            }), 500
+
+        print(f"✓ {detect_msg}")
+        detector_confidence_percent = round(float(detector_confidence) * 100, 2)
+        print(f"✓ Detector confidence: {detector_confidence_percent}%")
+
+        # Check if image is a chest X-ray with >90% confidence
+        if not is_chest_xray:
+            print(f"❌ Not a chest X-ray (confidence: {detector_confidence_percent}%)")
+            return jsonify({
+                'success': False,
+                'error': 'Uploaded image is not a valid Chest X-ray. Please upload a Chest X-ray image.'
+            }), 400
+
+        print("✓ Image confirmed as chest X-ray - proceeding to pneumonia analysis")
+
+        # ============================================
+        # STEP 3: PNEUMONIA PREDICTION
+        # ============================================
+
+        class_idx, confidence, pred_success, pred_msg = predict_pneumonia(img_array)
+
         if not pred_success:
-            print(f"❌ Prediction failed: {pred_msg}")
+            print(f"❌ Pneumonia prediction failed: {pred_msg}")
             return jsonify({
                 'success': False,
                 'error': pred_msg
             }), 500
-        
+
         print(f"✓ {pred_msg}")
-        
+
         # ============================================
-        # STEP 3: FORMAT RESPONSE
+        # STEP 4: FORMAT RESPONSE
         # ============================================
-        
+
         class_name = CLASS_NAMES[class_idx]
         confidence_percent = round(float(confidence) * 100, 2)
-        
+
         print(f"✓ Prediction: {class_name}")
         print(f"✓ Confidence: {confidence_percent}%")
-        
+
         # Prepare response
         response = {
             'success': True,
             'prediction': class_name,
             'confidence': confidence_percent,
             'description': CLASS_DESCRIPTIONS[class_name],
-            'message': f"{confidence_percent}% confidence that the X-ray shows {class_name}"
+            'message': f"{confidence_percent}% confidence that the X-ray shows {class_name}",
+            'detector_confidence': detector_confidence_percent
         }
-        
+
         print("✓ Response prepared successfully")
         print("=" * 60)
-        
+
         return jsonify(response), 200
     
     except Exception as e:
