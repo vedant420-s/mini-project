@@ -184,7 +184,7 @@ def print_system_info():
 
     # Check available memory (rough estimate)
     try:
-        import psutil
+        import psutil  # type: ignore
         memory = psutil.virtual_memory()
         print(f"RAM: {memory.total / (1024**3):.1f} GB total, {memory.available / (1024**3):.1f} GB available")
     except ImportError:

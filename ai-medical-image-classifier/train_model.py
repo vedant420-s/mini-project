@@ -25,12 +25,12 @@ Instructions:
 import os
 os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'
 import numpy as np
-import tensorflow as tf
-from tensorflow import keras
-from tensorflow.keras import layers, models
-from tensorflow.keras.preprocessing.image import ImageDataGenerator
-from tensorflow.keras.applications import MobileNetV2
-from sklearn.metrics import classification_report, confusion_matrix
+import tensorflow as tf  # type: ignore
+from tensorflow import keras  # type: ignore
+from tensorflow.keras import layers, models  # type: ignore
+from tensorflow.keras.preprocessing.image import ImageDataGenerator  # type: ignore
+from tensorflow.keras.applications import MobileNetV2  # type: ignore
+from sklearn.metrics import classification_report, confusion_matrix  # type: ignore
 import warnings
 
 warnings.filterwarnings('ignore')
