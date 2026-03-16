@@ -33,6 +33,7 @@ from tensorflow.keras import layers, models  # type: ignore
 from tensorflow.keras.preprocessing.image import ImageDataGenerator  # type: ignore
 from tensorflow.keras.applications import MobileNetV2  # type: ignore
 from sklearn.metrics import classification_report, confusion_matrix  # type: ignore
+from sklearn.utils.class_weight import compute_class_weight  # type: ignore
 import warnings
 
 warnings.filterwarnings('ignore')
@@ -201,12 +202,24 @@ print("=" * 60)
 print("This may take 10-20 minutes on CPU...")
 print("=" * 60)
 
-# Train the model
+# Calculate class weights to handle imbalanced data
+class_weights_array = compute_class_weight(
+    'balanced',
+    classes=np.unique(train_generator.classes),
+    y=train_generator.classes
+)
+class_weights = {i: w for i, w in enumerate(class_weights_array)}
+
+print(f"\n✓ Class weights computed: {class_weights}")
+print(f"  (Penalizes majority class less, minority class more)")
+
+# Train the model with class weights
 history = model.fit(
     train_generator,
     epochs=EPOCHS,
     batch_size=BATCH_SIZE,
     validation_data=test_generator,
+    class_weight=class_weights,  # Handle class imbalance
     verbose=1
 )
 

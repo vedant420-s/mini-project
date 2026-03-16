@@ -30,6 +30,8 @@ from tensorflow.keras.preprocessing import image
 from PIL import Image
 import io
 import json
+import torch
+from transformers import CLIPProcessor, CLIPModel
 
 # ============================================
 # FLASK APP INITIALIZATION
@@ -48,22 +50,15 @@ app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 PNEUMONIA_MODEL_PATH = os.path.join(BASE_DIR, 'models', 'model.h5')
-DETECTOR_MODEL_PATH = os.path.join(BASE_DIR, 'models', 'xray_detector.h5')
 
 print(f"Loading pneumonia model from {PNEUMONIA_MODEL_PATH}...")
-print(f"Loading detector model from {DETECTOR_MODEL_PATH}...")
+print(f"Loading CLIP model for chest X-ray detection...")
 
 # Check if pneumonia model exists
 if not os.path.exists(PNEUMONIA_MODEL_PATH):
     print(f"❌ ERROR: Pneumonia model not found at {PNEUMONIA_MODEL_PATH}")
     print("Please run train_model.py first to train the pneumonia model")
     exit(1)
-
-# Check if detector model exists
-if not os.path.exists(DETECTOR_MODEL_PATH):
-    print(f"⚠️ WARNING: Detector model not found at {DETECTOR_MODEL_PATH}")
-    print("Running without detector model - assuming all images are chest X-rays")
-    detector_model = None
 
 try:
     # Load the trained pneumonia model
@@ -73,14 +68,17 @@ except Exception as e:
     print(f"❌ Error loading pneumonia model: {e}")
     exit(1)
 
-if detector_model is not None:
-    try:
-        # Load the trained detector model
-        detector_model = load_model(DETECTOR_MODEL_PATH)
-        print("✓ Detector model loaded successfully!")
-    except Exception as e:
-        print(f"❌ Error loading detector model: {e}")
-        detector_model = None
+# Load CLIP model for zero-shot chest X-ray detection
+try:
+    clip_model = CLIPModel.from_pretrained("openai/clip-vit-base-patch32")
+    clip_processor = CLIPProcessor.from_pretrained("openai/clip-vit-base-patch32")
+    clip_model.eval()
+    print("✓ CLIP model loaded successfully!")
+    print("  (Zero-shot chest X-ray detection - no training needed)")
+except Exception as e:
+    print(f"❌ Error loading CLIP model: {e}")
+    clip_model = None
+    clip_processor = None
 
 # ============================================
 # DEFINE CLASSES
@@ -144,32 +142,53 @@ def preprocess_image(img_file):
 
 def detect_chest_xray(img_array):
     """
-    Detect if the image is a chest X-ray using the detector model
+    Detect if the image is a chest X-ray using CLIP zero-shot classification.
+    CLIP understands visual concepts semantically - no training data needed.
 
     Args:
-        img_array: Preprocessed numpy array
+        img_array: Preprocessed numpy array (0-1 range, shape [1, 224, 224, 3])
 
     Returns:
         is_chest_xray (bool), confidence (float), success (bool), message (str)
     """
-    # If detector model is not available, assume all images are chest X-rays
-    if detector_model is None:
-        return True, 1.0, True, "Detector model not available - assuming valid chest X-ray"
+    if clip_model is None or clip_processor is None:
+        return True, 1.0, True, "CLIP model not available - assuming valid chest X-ray"
 
     try:
-        # Get detector model prediction (output is probability for class 1 = Chest X-ray)
-        prediction = detector_model.predict(img_array, verbose=0)
+        # Convert normalized numpy array back to PIL Image for CLIP
+        img_uint8 = (img_array[0] * 255).astype(np.uint8)
+        pil_img = Image.fromarray(img_uint8)
 
-        # Extract confidence (probability of being a chest X-ray)
-        confidence = prediction[0][0]
+        # Define candidate labels - CLIP compares the image against these text descriptions
+        candidate_labels = [
+            "a chest x-ray radiograph",
+            "a photograph or screenshot",
+            "a hand or foot or knee or spine x-ray",
+        ]
 
-        # Determine if it's a chest X-ray (>90% confidence threshold)
-        is_chest_xray = confidence > 0.9
+        # Process image and text through CLIP
+        inputs = clip_processor(
+            text=candidate_labels,
+            images=pil_img,
+            return_tensors="pt",
+            padding=True
+        )
 
-        return is_chest_xray, confidence, True, "Detection successful"
+        with torch.no_grad():
+            outputs = clip_model(**inputs)
+            # Get similarity scores and convert to probabilities
+            logits = outputs.logits_per_image[0]
+            probs = torch.softmax(logits, dim=0).numpy()
+
+        chest_xray_prob = float(probs[0])  # probability for "chest x-ray"
+
+        # Accept only if CLIP is confident it's a chest X-ray (>50% since it's multi-class)
+        is_chest_xray = chest_xray_prob > 0.5
+
+        return is_chest_xray, chest_xray_prob, True, "CLIP detection successful"
 
     except Exception as e:
-        return False, 0.0, False, f"Error in detection: {str(e)}"
+        return False, 0.0, False, f"Error in CLIP detection: {str(e)}"
 
 def predict_pneumonia(img_array):
     """
