@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doctor Registration | CuraVision AI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="min-h-screen bg-[#f8fafc] text-slate-900">
+    <main class="mx-auto flex min-h-screen max-w-md items-center px-5">
+        <section class="w-full rounded-2xl bg-white p-6 shadow-xl">
+            <p class="text-xs font-semibold uppercase tracking-wider text-blue-600">CuraVision AI</p>
+            <h1 class="mt-1 text-2xl font-bold">Doctor Registration</h1>
+            <p class="mt-2 text-sm text-slate-500">Create your account and verify email before login.</p>
+
+            {% include 'components/flash_messages.html' %}
+
+            <form method="POST" class="mt-5 space-y-4">
+                <div>
+                    <label for="name" class="mb-1 block text-sm font-medium text-slate-700">Full Name</label>
+                    <input id="name" type="text" name="name" required class="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100" />
+                </div>
+                <div>
+                    <label for="email" class="mb-1 block text-sm font-medium text-slate-700">Email</label>
+                    <input id="email" type="email" name="email" required class="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100" />
+                </div>
+                <div>
+                    <label for="password" class="mb-1 block text-sm font-medium text-slate-700">Password (min 8 chars)</label>
+                    <input id="password" type="password" name="password" minlength="8" required class="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100" />
+                </div>
+                <button type="submit" class="w-full rounded-xl bg-blue-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-blue-700">Create Account</button>
+            </form>
+
+            <p class="mt-4 text-center text-sm text-slate-500">Already registered? <a href="{{ url_for('auth.login') }}" class="font-semibold text-blue-600">Login here</a></p>
+        </section>
+    </main>
+</body>
+</html>

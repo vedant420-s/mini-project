@@ -1,0 +1,17 @@
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        <div class="space-y-3">
+            {% for category, message in messages %}
+                {% set classes = {
+                    'success': 'bg-emerald-50 text-emerald-700 border-emerald-200',
+                    'danger': 'bg-red-50 text-red-700 border-red-200',
+                    'warning': 'bg-amber-50 text-amber-700 border-amber-200',
+                    'info': 'bg-blue-50 text-blue-700 border-blue-200'
+                } %}
+                <div class="rounded-xl border px-4 py-3 text-sm font-medium {{ classes.get(category, 'bg-slate-50 text-slate-700 border-slate-200') }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+{% endwith %}

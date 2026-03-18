@@ -1,0 +1,68 @@
+{% extends 'base_app.html' %}
+
+{% block title %}AI Helper | CuraVision AI{% endblock %}
+{% block page_title %}AI Helper{% endblock %}
+
+{% block content %}
+<section class="grid grid-cols-1 gap-6 xl:grid-cols-2">
+    <article class="rounded-2xl bg-white p-6 shadow-card">
+        <h3 class="text-lg font-semibold">CDSS Input</h3>
+        <form method="POST" class="mt-5 space-y-4">
+            <div>
+                <label for="patient_name" class="mb-1 block text-sm font-medium text-slate-700">Patient Name</label>
+                <input id="patient_name" name="patient_name" value="{{ form_values.patient_name }}" required class="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm focus:border-brand focus:outline-none focus:ring-2 focus:ring-blue-100" />
+            </div>
+            <div>
+                <label for="age" class="mb-1 block text-sm font-medium text-slate-700">Age</label>
+                <input id="age" name="age" type="number" min="0" max="120" value="{{ form_values.age }}" required class="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm focus:border-brand focus:outline-none focus:ring-2 focus:ring-blue-100" />
+            </div>
+            <div>
+                <label for="prediction" class="mb-1 block text-sm font-medium text-slate-700">Prediction Result</label>
+                <select id="prediction" name="prediction" class="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm focus:border-brand focus:outline-none focus:ring-2 focus:ring-blue-100">
+                    <option value="" {% if not form_values.prediction %}selected{% endif %}>Select</option>
+                    <option value="NORMAL" {% if form_values.prediction == 'NORMAL' %}selected{% endif %}>NORMAL</option>
+                    <option value="PNEUMONIA" {% if form_values.prediction == 'PNEUMONIA' %}selected{% endif %}>PNEUMONIA</option>
+                </select>
+            </div>
+            <div>
+                <label for="symptoms" class="mb-1 block text-sm font-medium text-slate-700">Symptoms</label>
+                <textarea id="symptoms" name="symptoms" rows="4" required class="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm focus:border-brand focus:outline-none focus:ring-2 focus:ring-blue-100">{{ form_values.symptoms }}</textarea>
+            </div>
+            <button type="submit" class="w-full rounded-xl bg-brand px-4 py-3 text-sm font-semibold text-white transition hover:bg-blue-700">Generate CDSS Recommendation</button>
+        </form>
+    </article>
+
+    <article class="rounded-2xl bg-white p-6 shadow-card">
+        <h3 class="text-lg font-semibold">AI Helper Output</h3>
+        {% if result %}
+        <div class="mt-5 space-y-4 animate-[fadeIn_0.4s_ease-in]">
+            <div class="rounded-xl bg-blue-50 p-4">
+                <p class="text-xs font-semibold uppercase tracking-wide text-blue-700">Possible Condition</p>
+                <p class="mt-1 text-lg font-semibold">{{ result.possible_condition }}</p>
+            </div>
+            <div class="rounded-xl p-4 {{ 'bg-red-50' if result.risk_level == 'High' else ('bg-amber-50' if result.risk_level == 'Medium' else 'bg-emerald-50') }}">
+                <p class="text-xs font-semibold uppercase tracking-wide {{ 'text-red-700' if result.risk_level == 'High' else ('text-amber-700' if result.risk_level == 'Medium' else 'text-emerald-700') }}">Risk Level</p>
+                <p class="mt-1 text-lg font-semibold">{{ result.risk_level }}</p>
+            </div>
+            <div class="rounded-xl bg-slate-50 p-4">
+                <p class="text-xs font-semibold uppercase tracking-wide text-slate-600">Recommendation</p>
+                <p class="mt-1 text-lg font-semibold">{{ result.recommendation }}</p>
+            </div>
+            <div class="rounded-xl border border-slate-200 p-4">
+                <p class="text-xs font-semibold uppercase tracking-wide text-slate-600">AI Summary</p>
+                <p class="mt-1 text-sm leading-6 text-slate-700">{{ result.summary }}</p>
+            </div>
+        </div>
+        {% else %}
+        <div class="mt-5 rounded-xl border border-dashed border-slate-300 bg-slate-50 p-8 text-center text-sm text-slate-500">Fill the form to generate AI helper recommendations.</div>
+        {% endif %}
+    </article>
+</section>
+
+<style>
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+</style>
+{% endblock %}
