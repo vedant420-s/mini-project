@@ -19,6 +19,11 @@
                     <label for="age" class="mb-1 block text-sm font-medium text-slate-700">Age</label>
                     <input id="age" name="age" type="number" min="0" max="120" required class="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm focus:border-brand focus:outline-none focus:ring-2 focus:ring-blue-100" />
                 </div>
+                <div class="sm:col-span-2">
+                    <label for="patient_identifier" class="mb-1 block text-sm font-medium text-slate-700">Patient ID (for Patient Login)</label>
+                    <input id="patient_identifier" name="patient_identifier" required pattern="[A-Za-z0-9_-]{3,32}" title="3-32 characters: letters, numbers, - or _" class="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm uppercase focus:border-brand focus:outline-none focus:ring-2 focus:ring-blue-100" />
+                    <p class="mt-1 text-xs text-slate-500">Share this ID with the patient so they can view reports without a password.</p>
+                </div>
             </div>
 
             <div>
@@ -56,6 +61,7 @@
             <p id="resultConfidence" class="text-4xl font-extrabold">0%</p>
             <p id="resultMessage" class="mt-3 text-base font-semibold"></p>
             <div class="mt-4 space-y-2 text-sm text-slate-700">
+                <p><span class="font-semibold">Patient ID:</span> <span id="patientIdentifier"></span></p>
                 <p><span class="font-semibold">Manual Symptoms:</span> <span id="manualSymptoms"></span></p>
                 <p><span class="font-semibold">AI Generated Symptoms:</span> <span id="generatedSymptoms"></span></p>
                 <p><span class="font-semibold">AI Insights:</span> <span id="aiInsights"></span></p>
@@ -74,6 +80,7 @@ const resultState = document.getElementById('resultState');
 const resultBadge = document.getElementById('resultBadge');
 const resultConfidence = document.getElementById('resultConfidence');
 const resultMessage = document.getElementById('resultMessage');
+const patientIdentifier = document.getElementById('patientIdentifier');
 const manualSymptoms = document.getElementById('manualSymptoms');
 const generatedSymptoms = document.getElementById('generatedSymptoms');
 const aiInsights = document.getElementById('aiInsights');
@@ -110,6 +117,7 @@ form.addEventListener('submit', async (event) => {
         resultBadge.textContent = isPneumonia ? 'PNEUMONIA DETECTED' : 'NORMAL';
         resultConfidence.textContent = `${Number(data.confidence).toFixed(2)}%`;
         resultMessage.textContent = data.message;
+        patientIdentifier.textContent = data.patient_identifier;
         manualSymptoms.textContent = data.manual_symptoms;
         generatedSymptoms.textContent = data.generated_symptoms;
         aiInsights.textContent = data.ai_insights;

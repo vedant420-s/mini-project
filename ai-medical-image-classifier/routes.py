@@ -3,6 +3,7 @@
 from datetime import datetime
 import io
 import os
+import re
 
 import numpy as np
 from flask import Blueprint, abort, flash, jsonify, redirect, render_template, request, send_file, send_from_directory, session, url_for
@@ -53,11 +54,22 @@ except Exception:
 
 
 ALLOWED_IMAGE_EXTENSIONS = {"jpg", "jpeg", "png", "gif", "bmp"}
+PATIENT_IDENTIFIER_PATTERN = re.compile(r"^[A-Za-z0-9_-]{3,32}$")
 
 
 def allowed_file(filename):
     """Validate file extension from filename."""
     return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_IMAGE_EXTENSIONS
+
+
+def normalize_patient_identifier(value):
+    """Normalize and validate patient ID used for patient portal access."""
+    candidate = (value or "").strip().upper()
+    if not candidate:
+        return None, "Patient ID is required."
+    if not PATIENT_IDENTIFIER_PATTERN.fullmatch(candidate):
+        return None, "Patient ID must be 3-32 characters (letters, numbers, - or _)."
+    return candidate, None
 
 
 def preprocess_image(img_file):
@@ -219,6 +231,10 @@ def predict_route():
     if error_message:
         return jsonify({"success": False, "error": error_message}), 400
 
+    patient_identifier, patient_id_error = normalize_patient_identifier(request.form.get("patient_identifier"))
+    if patient_id_error:
+        return jsonify({"success": False, "error": patient_id_error}), 400
+
     try:
         xray_file.stream.seek(0)
         img_array = preprocess_image(xray_file)
@@ -260,6 +276,7 @@ def predict_route():
 
         created_at = datetime.utcnow()
         patient = Patient(
+            patient_identifier=patient_identifier,
             name=patient_name,
             age=patient_age,
             symptoms=manual_symptoms,
@@ -289,6 +306,7 @@ def predict_route():
         return jsonify({
             "success": True,
             "patient_id": patient.id,
+            "patient_identifier": patient.patient_identifier,
             "patient_name": patient_name,
             "prediction": prediction,
             "confidence": confidence_percent,
@@ -321,6 +339,43 @@ def case_detail(case_id):
     return render_template("case_detail.html", case=case)
 
 
+@main_bp.route("/patient/login", methods=["GET", "POST"])
+def patient_login():
+    """Patient access page that accepts only patient ID."""
+    if request.method == "POST":
+        patient_identifier, error = normalize_patient_identifier(request.form.get("patient_identifier"))
+        if error:
+            flash(error, "danger")
+            return render_template("patient_login.html", patient_identifier="")
+        return redirect(url_for("main.patient_reports", patient_identifier=patient_identifier))
+
+    return render_template("patient_login.html", patient_identifier="")
+
+
+@main_bp.route("/patient/reports/<string:patient_identifier>")
+def patient_reports(patient_identifier):
+    """Show all reports mapped to the provided patient ID."""
+    normalized_id, error = normalize_patient_identifier(patient_identifier)
+    if error:
+        flash("Invalid Patient ID.", "danger")
+        return redirect(url_for("main.patient_login"))
+
+    reports = Patient.query.filter_by(patient_identifier=normalized_id).order_by(Patient.created_at.desc()).all()
+    return render_template("patient_reports.html", patient_identifier=normalized_id, reports=reports)
+
+
+@main_bp.route("/patient/reports/<string:patient_identifier>/<int:case_id>")
+def patient_report_detail(patient_identifier, case_id):
+    """Show one report if it belongs to the provided patient ID."""
+    normalized_id, error = normalize_patient_identifier(patient_identifier)
+    if error:
+        flash("Invalid Patient ID.", "danger")
+        return redirect(url_for("main.patient_login"))
+
+    report = Patient.query.filter_by(id=case_id, patient_identifier=normalized_id).first_or_404()
+    return render_template("patient_case_detail.html", case=report, patient_identifier=normalized_id)
+
+
 @main_bp.route("/cases/<int:case_id>/delete", methods=["POST"])
 @login_required
 def delete_case(case_id):
@@ -346,6 +401,32 @@ def delete_case(case_id):
 def case_image(case_id, kind):
     """Serve case images from database blob first, then filesystem fallback."""
     case = Patient.query.get_or_404(case_id)
+
+    if kind == "xray":
+        if case.image_blob:
+            return send_file(io.BytesIO(case.image_blob), mimetype=case.image_mime or "image/jpeg")
+        if case.image_path:
+            return send_from_directory(UPLOAD_ROOT, case.image_path)
+        abort(404)
+
+    if kind == "photo":
+        if case.photo_blob:
+            return send_file(io.BytesIO(case.photo_blob), mimetype=case.photo_mime or "image/jpeg")
+        if case.photo_path:
+            return send_from_directory(UPLOAD_ROOT, case.photo_path)
+        abort(404)
+
+    abort(404)
+
+
+@main_bp.route("/patient/reports/<string:patient_identifier>/<int:case_id>/image/<string:kind>")
+def patient_report_image(patient_identifier, case_id, kind):
+    """Serve report images for patient access when patient ID matches."""
+    normalized_id, error = normalize_patient_identifier(patient_identifier)
+    if error:
+        abort(404)
+
+    case = Patient.query.filter_by(id=case_id, patient_identifier=normalized_id).first_or_404()
 
     if kind == "xray":
         if case.image_blob:

@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Patient Login | CuraVision AI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="min-h-screen bg-slate-50 text-slate-900">
+    <main class="mx-auto flex min-h-screen max-w-md items-center px-5">
+        <section class="w-full rounded-2xl bg-white p-6 shadow-xl">
+            <p class="text-xs font-semibold uppercase tracking-wider text-blue-600">CuraVision AI</p>
+            <h1 class="mt-1 text-2xl font-bold">Patient Login</h1>
+            <p class="mt-2 text-sm text-slate-500">Enter your Patient ID to view your report.</p>
+
+            {% include 'components/flash_messages.html' %}
+
+            <form method="POST" class="mt-5 space-y-4">
+                <div>
+                    <label for="patient_identifier" class="mb-1 block text-sm font-medium text-slate-700">Patient ID</label>
+                    <input id="patient_identifier" type="text" name="patient_identifier" value="{{ patient_identifier }}" required pattern="[A-Za-z0-9_-]{3,32}" title="3-32 characters: letters, numbers, - or _" class="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm uppercase focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100" />
+                </div>
+                <button type="submit" class="w-full rounded-xl bg-blue-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-blue-700">View Reports</button>
+            </form>
+
+            <a href="{{ url_for('auth.login') }}" class="mt-4 block text-center text-sm font-semibold text-blue-600 hover:text-blue-800">Doctor Login</a>
+        </section>
+    </main>
+</body>
+</html>

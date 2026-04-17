@@ -17,6 +17,10 @@
                 <p class="text-lg font-semibold">{{ case.age }}</p>
             </div>
             <div class="rounded-xl border border-slate-200 bg-slate-50 p-4 md:col-span-2">
+                <p class="text-sm text-slate-500">Patient ID (Patient Portal)</p>
+                <p class="text-lg font-semibold font-mono">{{ case.patient_identifier or 'Not assigned' }}</p>
+            </div>
+            <div class="rounded-xl border border-slate-200 bg-slate-50 p-4 md:col-span-2">
                 <p class="text-sm text-slate-500">Manual Symptoms</p>
                 <p class="mt-1 text-base">{{ case.symptoms }}</p>
             </div>

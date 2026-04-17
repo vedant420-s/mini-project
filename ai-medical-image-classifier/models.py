@@ -27,6 +27,7 @@ class Patient(db.Model):
     __tablename__ = "patients"
 
     id = db.Column(db.Integer, primary_key=True)
+    patient_identifier = db.Column(db.String(64), nullable=True, index=True)
     name = db.Column(db.String(120), nullable=False)
     age = db.Column(db.Integer, nullable=False)
     symptoms = db.Column(db.Text, nullable=False)

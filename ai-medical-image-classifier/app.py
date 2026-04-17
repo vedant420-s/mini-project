@@ -54,6 +54,8 @@ with app.app_context():
         db.session.execute(text("ALTER TABLE patients ADD COLUMN photo_blob BLOB"))
     if "photo_mime" not in patient_columns:
         db.session.execute(text("ALTER TABLE patients ADD COLUMN photo_mime VARCHAR(100)"))
+    if "patient_identifier" not in patient_columns:
+        db.session.execute(text("ALTER TABLE patients ADD COLUMN patient_identifier VARCHAR(64)"))
 
     db.session.commit()
 

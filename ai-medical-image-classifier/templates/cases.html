@@ -14,6 +14,7 @@
             <thead class="bg-slate-50 text-slate-600">
                 <tr>
                     <th class="px-4 py-3 text-left">ID</th>
+                    <th class="px-4 py-3 text-left">Patient ID</th>
                     <th class="px-4 py-3 text-left">Patient</th>
                     <th class="px-4 py-3 text-left">Age</th>
                     <th class="px-4 py-3 text-left">Prediction</th>
@@ -26,6 +27,7 @@
                 {% for case in cases %}
                 <tr>
                     <td class="px-4 py-3">{{ case.id }}</td>
+                    <td class="px-4 py-3 font-mono text-xs text-slate-700">{{ case.patient_identifier or 'Not assigned' }}</td>
                     <td class="px-4 py-3">{{ case.name }}</td>
                     <td class="px-4 py-3">{{ case.age }}</td>
                     <td class="px-4 py-3">
@@ -44,7 +46,7 @@
                 </tr>
                 {% else %}
                 <tr>
-                    <td class="px-4 py-6 text-center text-slate-500" colspan="7">No cases available.</td>
+                    <td class="px-4 py-6 text-center text-slate-500" colspan="8">No cases available.</td>
                 </tr>
                 {% endfor %}
             </tbody>
