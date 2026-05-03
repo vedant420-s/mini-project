@@ -1,0 +1,172 @@
+{\rtf1\ansi\deff0
+{\fonttbl{\f0 Calibri;}{\f1 Cambria;}}
+\paperw12240\paperh15840\margl1440\margr1440\margt1440\margb1440
+\viewkind4\uc1\pard\sa120\sl276\slmult1\f1\fs34\b AI Medical Image Classifier\par
+\fs24 Comprehensive Technical Documentation for Faculty Review\b0\par
+\par
+\f0\fs22 Project Title: AI-Powered Clinical Decision Support System (CDSS) for Chest X-ray Triage\par
+Author(s): Vedant and Sakshi\par
+Repository: https://github.com/vedant420-s/mini-project\par
+Date: April 23, 2026\par
+\par
+\f1\fs26\b 1. Project Overview\b0\f0\fs22\par
+This project is an educational web-based clinical decision support system that assists with chest X-ray triage. It combines deep learning and rule-based logic to provide a preliminary NORMAL vs PNEUMONIA prediction, confidence score, symptom assistance, and case management workflow for doctors.\par
+\par
+\f1\fs26\b 2. Objectives\b0\f0\fs22\par
+- Build an AI-assisted pipeline for chest X-ray screening.\par
+- Provide a doctor-friendly workflow for upload, prediction, and case tracking.\par
+- Demonstrate backend, frontend, database, and AI integration in one deployable system.\par
+- Maintain clear medical disclaimer and responsible AI boundaries.\par
+\par
+\f1\fs26\b 3. Technology Stack\b0\f0\fs22\par
+Backend:\par
+- Python, Flask, Flask-SQLAlchemy, Flask-Bcrypt\par
+Database:\par
+- SQLite\par
+AI/ML:\par
+- TensorFlow/Keras (MobileNetV2 transfer learning model), Transformers CLIP model\par
+Frontend:\par
+- HTML, Jinja2 templates, Tailwind CSS classes, JavaScript\par
+Utilities:\par
+- Pillow/OpenCV for image processing, email providers (Resend/SendGrid/SMTP)\par
+\par
+\f1\fs26\b 4. AI Pipeline\b0\f0\fs22\par
+Stage 1: Chest X-ray suitability check\par
+- Uses CLIP-based image understanding to reduce non-chest-image misuse.\par
+\par
+Stage 2: Pneumonia classification\par
+- TensorFlow/Keras model predicts NORMAL or PNEUMONIA.\par
+- Confidence score and threshold logic are applied in backend routes.\par
+\par
+Clinical support layer:\par
+- Rule-based helper in ai_logic.py creates symptom hints and recommendation summary.\par
+\par
+\f1\fs26\b 5. Core Application Features\b0\f0\fs22\par
+- Doctor registration, login, OTP email verification\par
+- Upload chest X-ray with optional patient photo\par
+- Prediction endpoint with confidence and explanatory message\par
+- Case list, case details, and recent/high-risk dashboard sections\par
+- AI Helper page for CDSS recommendation support\par
+- Patient-facing report lookup flow (project artifact)\par
+\par
+\f1\fs26\b 6. Important Routes\b0\f0\fs22\par
+Authentication:\par
+- /auth/register\par
+- /auth/verify-email\par
+- /auth/login\par
+- /auth/logout\par
+\par
+Clinical workflow:\par
+- /dashboard\par
+- /upload\par
+- /predict (POST)\par
+- /cases\par
+- /cases/<case_id>\par
+- /ai-helper\par
+- /about\par
+\par
+\f1\fs26\b 7. Model and Performance Notes\b0\f0\fs22\par
+Reported academic metrics from project documentation:\par
+- Training Accuracy: 92.64%\par
+- Validation Accuracy: 87.66%\par
+- Test Accuracy: 87.66%\par
+\par
+Class-wise (reported):\par
+- NORMAL: Precision 92.90%, Recall 72.65%, F1 81.53%\par
+- PNEUMONIA: Precision 85.49%, Recall 96.67%, F1 90.73%\par
+\par
+Medical significance:\par
+- High pneumonia recall helps reduce missed severe cases.\par
+- False positives still require doctor confirmation.\par
+\par
+\f1\fs26\b 8. System Architecture (High Level)\b0\f0\fs22\par
+Frontend (Jinja templates + Tailwind UI)\par
+-> Flask routes and service logic\par
+-> AI model inference + rule-based helper\par
+-> SQLite persistence for doctor/patient/case records\par
+\par
+\f1\fs26\b 9. Database Design\b0\f0\fs22\par
+Database engine and ORM:\par
+- SQLite is used as the default relational database for this academic deployment.\par
+- Flask-SQLAlchemy ORM maps Python classes to tables and handles CRUD operations.\par
+\par
+Schema evolution strategy:\par
+- On startup, app.py runs db.create_all() and then executes lightweight ALTER TABLE checks for backward compatibility.\par
+- This supports existing local databases when new columns are added in project updates.\par
+\par
+Entity relationship summary:\par
+- Doctor (1 account) -> many authenticated sessions over time (session-managed).\par
+- Patient table stores one row per scan case/report, including prediction output and linked media.\par
+\par
+\f1\fs26\b 10. Database Tables\b0\f0\fs22\par
+Table: doctors\par
+- id (Integer, Primary Key)\par
+- name (String 120, required)\par
+- email (String 255, unique, indexed, required)\par
+- password_hash (String 255, required)\par
+- is_verified (Boolean, required, default False)\par
+- verification_otp (String 10, nullable)\par
+- otp_expires_at (DateTime, nullable)\par
+\par
+Table: patients\par
+- id (Integer, Primary Key)\par
+- patient_identifier (String 64, indexed, nullable)\par
+- name (String 120, required)\par
+- age (Integer, required)\par
+- symptoms (Text, required)\par
+- generated_symptoms (Text, required, default empty)\par
+- image_path (String 500, required)\par
+- photo_path (String 500, nullable)\par
+- image_blob (LargeBinary, nullable)\par
+- image_mime (String 100, nullable)\par
+- photo_blob (LargeBinary, nullable)\par
+- photo_mime (String 100, nullable)\par
+- prediction (String 50, required)\par
+- confidence (Float, required)\par
+- ai_insights (Text, required, default empty)\par
+- created_at (DateTime, required, default UTC timestamp)\par
+\par
+\f1\fs26\b 11. Project Flow Diagram\b0\f0\fs22\par
+Doctor workflow (primary):\par
+Doctor Register -> Email OTP Verification -> Login -> Dashboard -> Upload X-ray + Patient Details -> Chest X-ray Check (CLIP) -> Pneumonia Prediction (TensorFlow) -> Save Case in Database -> View Case History/Details\par
+\par
+Patient workflow (report lookup):\par
+Enter Patient ID -> Open Patient Reports -> View Report Detail with Prediction + Confidence + AI Insights\par
+\par
+System processing flow:\par
+Input Image -> Preprocessing (resize/normalize) -> Detector Gate -> Classifier Inference -> Rule-based Insight Generation -> JSON/UI Output + Persistent Storage\par
+\par
+\f1\fs26\b 12. Project Files (Core)\b0\f0\fs22\par
+- app.py (application setup and startup)\par
+- auth.py (authentication and OTP flow)\par
+- routes.py (main workflow and API routes)\par
+- models.py (database models)\par
+- ai_logic.py (CDSS helper logic)\par
+- email_utils.py (email notifications)\par
+- templates/*.html (UI pages)\par
+- models/model.h5, models/xray_detector.h5 (trained artifacts)\par
+\par
+\f1\fs26\b 13. Testing and Validation\b0\f0\fs22\par
+- test_app.py validates route and pipeline behavior in an educational setup.\par
+- Manual UI tests verify upload, prediction rendering, and case navigation.\par
+\par
+\f1\fs26\b 14. Limitations\b0\f0\fs22\par
+- Educational prototype only, not certified for clinical diagnosis.\par
+- Binary classification scope (NORMAL/PNEUMONIA only).\par
+- Performance depends on image quality and dataset composition.\par
+- Requires human clinical oversight in all cases.\par
+\par
+\f1\fs26\b 15. Future Enhancements\b0\f0\fs22\par
+- Multi-class disease support and explainability visualizations (e.g., Grad-CAM).\par
+- Better calibration and threshold tuning by deployment context.\par
+- Docker/cloud deployment with role-based access controls.\par
+- Broader datasets and bias/fairness evaluation pipeline.\par
+\par
+\f1\fs26\b 16. Ethical and Responsible AI Statement\b0\f0\fs22\par
+This system is designed for academic learning and preliminary assistance only. It does not replace licensed medical professionals. Every output must be verified by qualified clinicians before clinical decisions are made.\par
+\par
+\f1\fs26\b 17. Conclusion\b0\f0\fs22\par
+The project demonstrates a complete end-to-end AI application: model inference, rule-based clinical assistance, secure user flow, and practical web integration. It is a strong academic implementation bridging machine learning and healthcare-oriented software engineering.\par
+\par
+\f0\fs20 End of Document\par
+}

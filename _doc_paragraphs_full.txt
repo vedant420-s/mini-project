@@ -1,0 +1,162 @@
+0001|Normal|MINI PROJECT Ã¢â‚¬â€œ BCA20090
+0002|Normal|SY BCA 2025-26
+0003|Normal|SYNOPSIS REPORT
+0004|Normal|TITLE:
+0005|Normal|CuraVision AI Ã¢â‚¬â€œ AI Powered Medical Image Classification System
+0007|Normal|Submitted by:
+0008|List Paragraph|Vedant Khedkar - 1272240644
+0009|List Paragraph|Sakshi Pandey - 1272240631
+0011|Normal|Guided By:
+0012|Normal|Dr. Pradeep Kumar Tiwari
+0013|Normal|Mrs. Aparna Kulkarni
+0015|Normal|Dr. Vishwanath Karad MIT World Peace University
+0016|Normal|Department of Computer Science and Applications
+0017|Normal|Academic Year: 2025-26
+0018|Normal|Date: 1st February 2026
+0020|Normal|Index
+0022|Normal|Nomenclature/Notations
+0023|Normal|The following abbreviations and technical terms are used throughout this synopsis to describe the architecture and functionality of the CuraVision - AI system:
+0024|Normal (Web)|Here is the refined list with unnecessary spaces removed and key terms formatted for better readability:
+0025|Normal (Web)|Artificial Intelligence (AI): A branch of computer science focused on building systems capable of performing tasks that normally require human intelligence, such as learning, reasoning, and decision-making.
+0026|Normal (Web)|Convolutional Neural Network (CNN): A specialized deep learning architecture designed to process and analyze visual data by learning hierarchical spatial features.
+0027|Normal (Web)|Chest X-ray (CXR): A radiographic imaging technique used to diagnose lung diseases, including Pneumonia.
+0028|Normal (Web)|Out-of-Distribution (OOD): Input data that does not belong to the training dataset, often causing unreliable predictions.
+0029|Normal (Web)|Transfer Learning: A machine learning technique where knowledge gained from one task is applied to a related task.
+0030|Normal (Web)|MobileNetV2: A lightweight CNN architecture optimized for performance and computational efficiency.
+0031|Normal (Web)|Flask: A Python micro-framework used for developing backend web applications.
+0032|Normal (Web)|TensorFlow / Keras: Deep learning libraries used to design, train, and deploy neural networks.
+0033|Normal (Web)|Confidence Score: A probability value representing prediction certainty.
+0035|Normal|Abstract
+0036|Normal|CuraVision AI is an educational AI-powered clinical decision support system that assists healthcare professionals in preliminary pneumonia triage using Chest X-ray (CXR) images. The updated system now combines model inference, doctor authentication, case management, and AI-generated support text in one integrated workflow.
+0037|Normal|The proposed system uses a two-stage AI pipeline with clinical workflow integration:
+0038|Normal|Stage 1: Chest X-ray Suitability Validation - A CLIP-based detector checks whether the uploaded image is a valid chest X-ray before diagnosis, reducing Out-of-Distribution (OOD) errors.
+0039|Normal|Stage 2: Pneumonia Classification - Valid chest X-rays are classified as NORMAL or PNEUMONIA by a TensorFlow/Keras transfer-learning model (MobileNetV2-based).
+0040|Normal|The models are integrated into a Flask web application with doctor login, OTP verification, case history, confidence reporting, and an AI Helper page for symptom-based recommendations.
+0043|Normal|Motivation
+0044|Normal|Motivation for CuraVision AI
+0045|Normal|The motivation for developing CuraVision AI arises from the growing demand for efficient and reliable diagnostic tools in healthcare. Pneumonia continues to be a leading cause of respiratory illness globally, requiring rapid and accurate diagnosis.
+0046|Normal|Manual interpretation of Chest X-ray images is time-consuming and dependent on expert radiologists. In rural and under-resourced medical facilities, access to such expertise is limited, leading to delayed diagnoses and increased risk to patients.
+0047|Normal|CuraVision AI aims to bridge this gap through the following objectives:
+0048|Normal|Reducing Diagnostic Delays: Providing automated preliminary analysis of X-ray images to speed up the clinical workflow.
+0049|Normal|Improving Reliability: Addressing the lack of robustness in traditional AI models by introducing a dedicated image validation mechanism.
+0050|Normal|Educational Foundation: Serving as a platform for understanding deep learning, medical imaging, and ethical AI deployment.
+0053|Normal|Literature Review
+0055|Normal|To understand the necessity of CuraVision AI, it is essential to analyze the existing methods of medical image analysis and their respective limitations. The following table provides a comparison between traditional methods and the proposed digital solution.
+0059|Normal|Problem Formulation & Objectives
+0060|Normal|Problem Statement and Objectives
+0061|Normal|The development of CuraVision AI is guided by a clear focus on improving the reliability of automated medical diagnostics. Below are the core challenges and the structured goals defined for this project.
+0062|Normal|Problem Statement
+0063|Normal|Existing AI-based medical image classification systems generate predictions for any input image without validating its medical relevance. This leads to incorrect diagnoses and reduces trust in AI-assisted healthcare systems.
+0065|Normal|Main Objective
+0066|Normal|To design and develop a reliable AI-powered system capable of detecting Pneumonia from Chest X-ray images with high accuracy and confidence.
+0068|Normal|Specific Objectives
+0069|Normal|Implement a two-stage CNN pipeline: Develop a structured flow that first validates the image type before performing medical classification.
+0070|Normal|Detect and reject Out-of-Distribution (OOD) images: Ensure the system identifies and filters out non-medical or unrelated images to maintain diagnostic integrity.
+0071|Normal|Classify Chest X-ray images: Use deep learning to accurately categorize validated scans into NORMAL or PNEUMONIA.
+0072|Normal|Display prediction confidence scores: Provide transparency by showing a probability value representing the certainty of each prediction.
+0073|Normal|Deploy a scalable web-based application: Integrate the models into a Flask framework to allow for real-time image uploads and results.
+0077|Normal|Methodology/ Planning of Work
+0080|Normal|6.1 Requirement Analysis
+0081|Normal|The requirement analysis phase for CuraVision AI defines the necessary technical environment and functional needs to ensure the system operates reliably within a medical diagnostic setting.
+0082|Normal|Functional Requirements
+0083|Normal|Image Validation: The system must identify whether an uploaded image is a chest X-ray using a dedicated suitability stage before classification.
+0084|Normal|High-Recall Classification: The core classifier must categorize validated scans into NORMAL or PNEUMONIA with medically useful recall for pneumonia cases.
+0085|Normal|Real-time Clinical Feedback: The web interface must provide prediction, confidence score, and contextual AI insights immediately after upload.
+0086|Normal|Case and Audit Management: The backend must store patient cases, prediction outputs, and timestamps for later review by doctors.
+0088|Normal|Software Requirements
+0089|Normal|To develop and deploy the current pipeline, the following software stack is used:
+0090|Normal|Programming Language: Python 3.11.x (core backend and AI integration).
+0091|Normal|Machine Learning Frameworks: TensorFlow/Keras, scikit-learn, and Transformers (CLIP support).
+0092|Normal|Web Framework: Flask with Flask-SQLAlchemy and Flask-Bcrypt.
+0093|Normal|Image Processing: OpenCV and Pillow (preprocessing and upload validation support).
+0094|Normal|Environment Management: Python virtual environment (.venv) with pip-based dependency management.
+0095|Normal|Version Control: Git and GitHub (collaborative development and release tracking).
+0097|Normal|Hardware Requirements
+0098|Normal|While the system is designed to be lightweight using MobileNetV2, the following hardware specifications are recommended for optimal training and inference:
+0099|Normal|Processor: Multicore CPU (Intel i5/i7 or equivalent) for handling concurrent web requests and local preprocessing.
+0100|Normal|Memory (RAM): Minimum 8GB (16GB recommended) to support model loading and image batch processing.
+0101|Normal|Storage: Approximately 2GB of free space for the Kaggle Chest X-ray Dataset and model artifacts.
+0102|Normal|GPU (Optional): An NVIDIA GPU with CUDA support is recommended to reduce the model training time significantly.
+0103|Normal|In this initial phase, the primary focus is understanding the needs of healthcare professionals and medical facilities. This involves identifying critical factors in Pneumonia detectionÃ¢â‚¬â€such as the necessity for high recall (96.67%)Ã¢â‚¬â€and determining the most effective data pipeline for high-accuracy reporting. Planning also includes establishing a validation mechanism to address the Out-of-Distribution (OOD) problem, ensuring the system only processes relevant Chest X-ray data.
+0105|Normal|6.2 Implementation Phases
+0106|Normal|System Design: A modular architecture was designed with authentication, upload/inference flow, AI helper logic, and persistent case records.
+0107|Normal|Frontend Development: A responsive Jinja2 + Tailwind interface was built for dashboard, upload, case details, and AI helper workflows.
+0108|Normal|Backend Development: Flask routes implement authentication, OTP verification, prediction APIs, and case retrieval endpoints.
+0109|Normal|Database Integration: SQLite via SQLAlchemy stores doctor profiles, patient cases, predictions, confidence values, and metadata.
+0111|Normal|6.3 System Architecture
+0112|Normal|The updated CuraVision AI architecture follows a secure client-server model connecting doctor workflows with an AI inference pipeline and persistent storage.
+0113|Normal|Workflow Components
+0114|Normal|Access Layer: Doctors authenticate through registration/login and OTP verification before accessing clinical features.
+0115|Normal|Validation Layer (OOD Control): Uploaded images are screened for chest X-ray suitability using CLIP-based validation to reduce invalid inference.
+0116|Normal|Inference Layer: Valid images are processed by the MobileNetV2-based classifier to produce NORMAL or PNEUMONIA predictions with confidence.
+0117|Normal|Data Layer: SQLite stores uploaded case records, symptoms, AI insights, predictions, confidence, and timestamps for follow-up.
+0118|Normal|Clinical Dashboard Layer: Doctors review recent/high-risk cases, inspect case details, and use AI Helper recommendations to support decisions.
+0119|Normal|6.4 Database Design
+0120|Normal|Figure 6.4: Database Design Diagram
+0122|Normal|The ER-style diagram above shows key entities, important attributes, and the workflow relationship used by the current application design.
+0123|Normal|6.5 Database Tables
+0124|Normal|Doctors Table (doctors): Stores doctor profile, hashed password, verification OTP, and verification state for secure login and onboarding workflow.
+0125|Normal|Patients Table (patients): Stores patient identifier, demographics, symptoms, uploaded image paths/blob data, prediction result, confidence score, AI insights, and timestamp for each case report.
+0126|Normal|6.6 Project Flow Diagram
+0127|Normal|Figure 6.6: End-to-End Project Flow
+0129|Normal|The flow diagram illustrates doctor onboarding, image validation, prediction, insight generation, storage, and report access steps.
+0130|Normal|6.7 Testing and Deployment
+0131|Normal|Development Phases and Testing
+0132|Normal|The implementation of CuraVision AI follows a structured lifecycle, moving from technical setup to real-world deployment and rigorous evaluation.
+0133|Normal|Development Phases
+0134|Normal|The development process is divided into key stages to ensure the system is both robust and scalable:
+0135|Normal|Environment Setup: Configure Python environment and install TensorFlow, Flask, SQLAlchemy, Transformers, and related dependencies.
+0136|Normal|Dataset Preparation: Organize chest X-ray datasets for training/validation/testing and maintain detector data for suitability checks.
+0137|Normal|Preprocessing: Apply resizing, normalization, and augmentation pipelines to improve robustness and generalization.
+0138|Normal|Model Training: Train/evaluate MobileNetV2-based pneumonia classifier and maintain chest X-ray suitability detector artifacts.
+0139|Normal|Backend API Development: Build Flask endpoints for upload, prediction, case management, and helper recommendations.
+0140|Normal|Frontend Integration: Connect templates and JavaScript interactions to backend APIs for real-time output rendering.
+0141|Normal|Deployment: Run as a local or hosted Flask service with environment-based configuration and reproducible startup scripts.
+0152|Normal|Dataset Specifications
+0153|Normal|7. Dataset Specifications
+0154|Normal|CuraVision AI uses both structured application data and image datasets: SQLite stores operational records, while Kaggle chest X-ray directories provide training/validation/test image data.
+0155|Normal|Dataset Directory Structure
+0156|Normal|The following table defines the organization of the Kaggle files used to train, validate, and test the model.
+0158|Normal|7.1. Data Attributes & Metadata
+0159|Normal|In addition to dataset-level image attributes, the deployed app maintains SQL-backed case metadata for each uploaded scan and prediction event.
+0160|Normal|Image_ID / Case_ID: Unique identifiers for uploaded scans and patient cases used in application tracking.
+0161|Normal|Label / Prediction: Ground-truth labels in training data and model outputs (NORMAL or PNEUMONIA) in deployment.
+0162|Normal|Dimensions: Input images are standardized to model-compatible resolution (e.g., 224x224 for MobileNetV2 pipeline).
+0163|Normal|Color Handling: Chest X-rays are preprocessed to match model input format while preserving diagnostic structures.
+0164|Normal|Class Distribution: Training data remains imbalanced; evaluation emphasizes clinically meaningful recall and precision trade-offs.
+0166|Normal|7.2. Dataset Integrity & Validation
+0167|Normal|To maintain reliability in both training and deployment, CuraVision AI enforces the following validation constraints:
+0168|Normal|Suitability Check: The Stage 1 validator filters non-chest images before medical classification is executed.
+0169|Normal|Normalization: Pixel values are scaled consistently so model inference remains stable across uploads.
+0170|Normal|Data Integrity: Input sanitation, file-type checks, and controlled preprocessing reduce corrupted or invalid samples.
+0197|Normal|Testing and Evaluation
+0198|Normal|8. Testing and Evaluations
+0199|Normal|To ensure the updated CuraVision AI system provides reliable support, the following testing protocols are used:
+0200|Normal|Functional Testing: Verify registration/login, OTP flow, upload, prediction rendering, case views, and AI helper interactions.
+0201|Normal|Validation Testing: Confirm Stage 1 suitability screening correctly identifies chest X-ray vs non-chest inputs.
+0202|Normal|Model Evaluation: Assess classifier quality using precision, recall, F1-score, confusion matrix, and confidence behavior.
+0203|Normal|Usability Testing: Validate that doctors can interpret outputs, confidence, and recommendations quickly from the dashboard UI.
+0223|Normal|Facilities Required for Proposed Work
+0224|Normal|The following hardware and software facilities are required for the successful development and deployment of CuraVision AI:
+0225|Normal|9.1 Hardware Requirements:
+0226|Normal|Development Machine: Minimum 8 GB RAM (16 GB recommended) with a modern multi-core processor for model loading and local Flask execution.
+0227|Normal|Optional GPU Machine: NVIDIA CUDA-capable GPU is recommended for faster model training and experimentation.
+0228|Normal|Storage and Network: Sufficient storage for datasets/models and stable internet for dependency installation and repository sync.
+0229|Normal|9.2 Software Requirements:
+0230|Normal|Operating System: Windows, macOS, or Linux.
+0231|Normal|IDE: Visual Studio Code (recommended) or any Python-compatible IDE.
+0232|Normal|Version Control: Git and GitHub for source control and collaboration.
+0233|Normal|Frontend: Jinja2 templates with HTML, Tailwind utility classes, and JavaScript.
+0234|Normal|Backend: Python + Flask ecosystem (Flask-SQLAlchemy, Flask-Bcrypt, routing modules).
+0235|Normal|Database: SQLite (current implementation via SQLAlchemy ORM).
+0238|Normal|Bibliography/References
+0239|Normal|10. References
+0240|Normal|The following resources provided the foundational data, technical frameworks, and architectural principles required to develop CuraVision AI.
+0241|Normal|1. Kaggle Chest X-ray Dataset
+0242|Normal|The Kaggle Chest X-ray Dataset is a publicly available and widely referenced dataset used for academic research and educational projects in the field of medical image analysis. The dataset contains a large collection of labeled Chest X-ray images classified into categories such as NORMAL and PNEUMONIA. It is commonly used for training, testing, and validating deep learning models due to its standardized structure and reliable annotations. This dataset enables the exploration of Convolutional Neural Networks and transfer learning techniques while addressing real-world challenges in medical diagnosis.
+0243|Normal|2. TensorFlow & Keras Documentation
+0244|Normal|The official TensorFlow and Keras documentation provides comprehensive guidance on the design, training, optimization, and deployment of deep learning models. These resources cover essential concepts such as neural network architectures, loss functions, optimization algorithms, and model evaluation techniques. In the CuraVision AI project, these frameworks were used to implement CNN models, apply transfer learning, and manage the end-to-end training pipeline.
+0245|Normal|3. MobileNetV2 Research Paper
+0246|Normal|The MobileNetV2 research paper presents a lightweight and efficient Convolutional Neural Network architecture designed for high performance with reduced computational cost. The architecture introduces inverted residual blocks and linear bottlenecks, enabling faster inference while maintaining high accuracy. In this project, MobileNetV2 was utilized as a pre-trained backbone model through transfer learning, allowing for effective feature extraction and improved classification performance.
+0247|Normal|4. Flask Documentation
+0248|Normal|The Flask documentation provides detailed information on building web-based applications and APIs using the Flask micro-framework. Known for its simplicity and ease of integration with machine learning models, Flask was used in the CuraVision AI system to develop the backend server responsible for handling image uploads, processing model inference requests, and returning prediction results to the user interface.

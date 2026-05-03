@@ -56,6 +56,7 @@ IMG_SIZE = 224  # MobileNetV2 requires 224x224 images
 BATCH_SIZE = 32
 EPOCHS = 3  # Reduced for faster training
 LEARNING_RATE = 0.001
+#Reduce epoch speed and increas elearning rate with increase in batch size
 
 print(f"✓ Image Size: {IMG_SIZE}x{IMG_SIZE}")
 print(f"✓ Batch Size: {BATCH_SIZE}")

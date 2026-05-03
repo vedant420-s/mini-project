@@ -38,13 +38,24 @@ CLASS_DESCRIPTIONS = {
     "PNEUMONIA": "The X-ray shows signs consistent with pneumonia.",
 }
 PNEUMONIA_THRESHOLD = float(os.getenv("PNEUMONIA_THRESHOLD", "0.40"))
+MODEL_LOADING_DISABLED = os.getenv("DISABLE_AI_MODELS", "0").strip().lower() in {"1", "true", "yes", "on"}
 
-if not os.path.exists(PNEUMONIA_MODEL_PATH):
-    raise RuntimeError(f"Pneumonia model not found at {PNEUMONIA_MODEL_PATH}")
+pneumonia_model = None
+pneumonia_model_error = ""
 
-pneumonia_model = load_model(PNEUMONIA_MODEL_PATH)
+if MODEL_LOADING_DISABLED:
+    pneumonia_model_error = "Model loading disabled via DISABLE_AI_MODELS"
+elif not os.path.exists(PNEUMONIA_MODEL_PATH):
+    pneumonia_model_error = f"Pneumonia model not found at {PNEUMONIA_MODEL_PATH}"
+else:
+    try:
+        pneumonia_model = load_model(PNEUMONIA_MODEL_PATH)
+    except Exception as exc:
+        pneumonia_model_error = f"Failed to load pneumonia model: {exc}"
 
 try:
+    if MODEL_LOADING_DISABLED:
+        raise RuntimeError("CLIP loading disabled via DISABLE_AI_MODELS")
     clip_model = CLIPModel.from_pretrained("openai/clip-vit-base-patch32")
     clip_processor = CLIPProcessor.from_pretrained("openai/clip-vit-base-patch32")
     clip_model.eval()
@@ -215,6 +226,13 @@ def upload_page():
 @login_required
 def predict_route():
     """Process X-ray upload, run model, save case, and send notifications."""
+    if pneumonia_model is None:
+        return jsonify({
+            "success": False,
+            "error": "Prediction model is unavailable. Server is running in limited mode.",
+            "details": pneumonia_model_error,
+        }), 503
+
     if "file" not in request.files:
         return jsonify({"success": False, "error": "Chest X-ray image is required."}), 400
 
@@ -485,6 +503,8 @@ def about():
             "name": "CuraVision AI Clinical Decision Support System",
             "classes": CLASS_NAMES,
             "pneumonia_threshold_percent": round(PNEUMONIA_THRESHOLD * 100, 2),
+            "model_enabled": pneumonia_model is not None,
+            "model_status": "ready" if pneumonia_model is not None else pneumonia_model_error,
         }
     )
 

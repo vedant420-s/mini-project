@@ -5,11 +5,11 @@
 
 {% block content %}
 <section class="rounded-2xl bg-white p-5 shadow-card">
-    <div class="mb-4 flex items-center justify-between">
+    <div class="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <h3 class="text-lg font-semibold">Case Records</h3>
-        <a href="{{ url_for('main.upload_page') }}" class="rounded-xl bg-brand px-4 py-2 text-sm font-semibold text-white transition hover:bg-blue-700">Upload New</a>
+        <a href="{{ url_for('main.upload_page') }}" class="w-full rounded-xl bg-brand px-4 py-2.5 text-center text-sm font-semibold text-white transition hover:bg-blue-700 sm:w-auto">Upload New</a>
     </div>
-    <div class="overflow-x-auto">
+    <div class="hidden overflow-x-auto md:block">
         <table class="min-w-full text-sm">
             <thead class="bg-slate-50 text-slate-600">
                 <tr>
@@ -51,6 +51,36 @@
                 {% endfor %}
             </tbody>
         </table>
+    </div>
+
+    <div class="space-y-3 md:hidden">
+        {% for case in cases %}
+        <article class="rounded-xl border border-slate-200 p-4">
+            <div class="flex items-start justify-between gap-3">
+                <div>
+                    <p class="font-semibold text-slate-900">{{ case.name }}</p>
+                    <p class="mt-1 font-mono text-xs text-slate-500">ID: {{ case.patient_identifier or 'Not assigned' }}</p>
+                </div>
+                <span class="rounded-full px-3 py-1 text-xs font-semibold {{ 'bg-red-100 text-red-700' if case.prediction == 'PNEUMONIA' else 'bg-emerald-100 text-emerald-700' }}">{{ case.prediction }}</span>
+            </div>
+
+            <div class="mt-3 grid grid-cols-2 gap-2 text-sm text-slate-700">
+                <p><span class="font-semibold">Case #:</span> {{ case.id }}</p>
+                <p><span class="font-semibold">Age:</span> {{ case.age }}</p>
+                <p><span class="font-semibold">Confidence:</span> {{ '%.2f'|format(case.confidence) }}%</p>
+                <p><span class="font-semibold">Created:</span> {{ case.created_at.strftime('%Y-%m-%d') }}</p>
+            </div>
+
+            <div class="mt-4 flex flex-wrap items-center gap-3">
+                <a href="{{ url_for('main.case_detail', case_id=case.id) }}" class="rounded-lg bg-slate-900 px-3 py-2 text-sm font-semibold text-white">Open</a>
+                <form action="{{ url_for('main.delete_case', case_id=case.id) }}" method="POST" onsubmit="return confirm('Delete all stored data for {{ case.name }}? This cannot be undone.');">
+                    <button type="submit" class="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm font-semibold text-red-700">Delete</button>
+                </form>
+            </div>
+        </article>
+        {% else %}
+        <div class="rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-500">No cases available.</div>
+        {% endfor %}
     </div>
 </section>
 {% endblock %}

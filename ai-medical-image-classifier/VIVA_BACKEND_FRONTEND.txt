@@ -1,0 +1,101 @@
+AI MEDICAL IMAGE CLASSIFIER - VIVA NOTES
+
+Project Type:
+Educational Clinical Decision Support System (CDSS) for chest X-ray triage.
+
+============================================================
+BACKEND
+============================================================
+
+Core Backend Language:
+- Python
+
+Backend Framework and Libraries:
+- Flask (web framework and routing)
+- Flask-SQLAlchemy (ORM and database access)
+- Flask-Bcrypt (password hashing)
+- Werkzeug (request/file utilities)
+
+Database:
+- SQLite (local relational database)
+
+Backend Modules in this Project:
+- app.py (Flask app initialization and config)
+- auth.py (register, login, OTP verification)
+- routes.py (dashboard, upload, prediction, case management)
+- models.py (Doctor and Patient tables)
+- email_utils.py (email notifications)
+- ai_logic.py (rule-based helper logic)
+
+Backend Features:
+- Doctor authentication and session management
+- Email OTP verification flow
+- Patient case storage and history
+- Image upload handling and validation
+- AI prediction API endpoint
+- Confidence threshold logic for pneumonia output
+
+============================================================
+AI MODELS USED
+============================================================
+
+1) Pneumonia Classification Model:
+- Transfer learning with MobileNetV2 (TensorFlow/Keras)
+- Binary classes: NORMAL vs PNEUMONIA
+- Saved file: models/model.h5
+
+2) Chest X-ray Suitability/Detection Stage:
+- CLIP model from Transformers: openai/clip-vit-base-patch32
+- Library stack: Transformers + PyTorch
+- Used to check whether uploaded image is a chest x-ray
+
+3) Additional Trained Detector Artifact:
+- File: models/xray_detector.h5
+- Trained as chest_xray vs not_chest_xray detector (project artifact)
+
+============================================================
+FRONTEND
+============================================================
+
+Core Frontend Languages:
+- HTML
+- CSS
+- JavaScript
+
+Frontend Stack and Templating:
+- Jinja2 templates (server-rendered pages from Flask)
+- Tailwind CSS (UI styling and layout)
+
+Important Frontend Pages:
+- templates/login.html
+- templates/register.html
+- templates/verify_email.html
+- templates/dashboard.html
+- templates/upload.html
+- templates/cases.html
+- templates/case_detail.html
+- templates/ai_helper.html
+
+Frontend Features:
+- Login/Register pages for doctors
+- Dashboard with case statistics and alerts
+- Upload form for X-ray and optional patient photo
+- Prediction result display with confidence
+- Case list and case detail screens
+- AI helper recommendation page
+
+============================================================
+LANGUAGES USED (SUMMARY)
+============================================================
+
+- Python (backend, AI integration, training scripts)
+- HTML (UI structure)
+- CSS via Tailwind utility classes (UI styling)
+- JavaScript (UI scripts and Tailwind config)
+- SQL concepts via SQLite and SQLAlchemy ORM
+
+============================================================
+VIVA ONE-LINE SUMMARY
+============================================================
+
+This project is a Flask-based CDSS web app that uses TensorFlow MobileNetV2 and CLIP-based image understanding to support chest X-ray triage, with a Jinja + Tailwind frontend and SQLite database.
